@@ -24,12 +24,11 @@ build/
 *.m4a
 *.ogg
 
-# Transcription outputs (keep in output/ directory)
-*.txt
-*.json
+# Transcription outputs
 *.srt
 *.vtt
 !.env.example
+!requirements.txt
 
 # Temporary files
 *.tmp
