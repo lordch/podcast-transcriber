@@ -116,6 +116,27 @@ class NotionClient:
                 )
                 response.raise_for_status()
 
+    async def update_url_field(self, page_id: str, url: str) -> None:
+        """
+        Update the URL field if it was empty and URL was in title.
+
+        Tries common URL property names used in Notion databases.
+        """
+        api_url = f"{NOTION_API_BASE}/pages/{page_id}"
+
+        # Try different property names for URL field
+        url_property_names = ["URL", "url", "Link", "link", "Source", "source"]
+
+        for prop_name in url_property_names:
+            try:
+                data = {"properties": {prop_name: {"url": url}}}
+                async with httpx.AsyncClient() as client:
+                    response = await client.patch(api_url, headers=self.headers, json=data)
+                    if response.status_code == 200:
+                        return  # Success
+            except Exception:
+                continue  # Try next property name
+
     def _split_text(self, text: str, max_length: int = 2000) -> list[str]:
         """Split text into chunks respecting word boundaries."""
         if len(text) <= max_length:

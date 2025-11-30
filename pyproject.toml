@@ -1,7 +1,7 @@
 [project]
 name = "podcast-transcriber"
-version = "1.0.0"
-description = "Transcribe YouTube videos and Apple Podcasts, save to Notion"
+version = "2.0.0"
+description = "Transcribe YouTube videos, Apple Podcasts, and extract articles. Save to Notion."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -12,6 +12,7 @@ dependencies = [
     "httpx>=0.25.0",
     "openai>=1.3.0",
     "yt-dlp>=2024.0.0",
+    "beautifulsoup4>=4.12.0",
     "python-dotenv>=1.0.0",
 ]
 
