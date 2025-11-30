@@ -1,0 +1,47 @@
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+
+# Downloaded audio files
+*.wav
+*.mp3
+*.m4a
+*.ogg
+
+# Transcription outputs (keep in output/ directory)
+*.txt
+*.json
+*.srt
+*.vtt
+!.env.example
+
+# Temporary files
+*.tmp
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
