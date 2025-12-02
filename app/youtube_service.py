@@ -1,11 +1,15 @@
-"""YouTube transcript service using yt-dlp."""
+"""YouTube transcript service using youtube-transcript-api."""
 
 import re
-import tempfile
-from pathlib import Path
 from typing import Optional
 
-from yt_dlp import YoutubeDL
+import httpx
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import (
+    TranscriptsDisabled,
+    NoTranscriptFound,
+    VideoUnavailable,
+)
 
 
 def extract_video_id(url: str) -> Optional[str]:
@@ -32,7 +36,7 @@ def is_youtube_url(url: str) -> bool:
 
 async def get_youtube_transcript(url: str, language: str = "en") -> dict:
     """
-    Download transcript from YouTube video.
+    Download transcript from YouTube video using youtube-transcript-api.
 
     Args:
         url: YouTube video URL
@@ -45,92 +49,45 @@ async def get_youtube_transcript(url: str, language: str = "en") -> dict:
     if not video_id:
         raise ValueError(f"Could not extract video ID from URL: {url}")
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        output_template = str(Path(temp_dir) / "%(title)s.%(ext)s")
+    try:
+        # Create API instance and fetch transcript
+        api = YouTubeTranscriptApi()
 
-        ydl_opts = {
-            "writesubtitles": True,
-            "writeautomaticsub": True,
-            "subtitleslangs": [language, "en"],  # Fallback to English
-            "subtitlesformat": "vtt",
-            "skip_download": True,
-            "quiet": True,
-            "no_warnings": True,
-            "outtmpl": output_template,
-        }
+        # Try to get transcript in preferred language, fallback to English
+        transcript_data = api.fetch(video_id, languages=[language, 'en'])
 
-        with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            title = info.get("title", "Unknown Title")
+        # Combine all text segments
+        text_parts = [entry.text for entry in transcript_data]
+        full_transcript = ' '.join(text_parts)
 
-            # Find the downloaded subtitle file
-            subtitle_file = None
-            temp_path = Path(temp_dir)
+        # Clean up the transcript
+        full_transcript = re.sub(r'\n+', ' ', full_transcript)
+        full_transcript = re.sub(r'\s+', ' ', full_transcript)
+        full_transcript = full_transcript.strip()
 
-            for ext in ["vtt", "srt", "json3"]:
-                files = list(temp_path.glob(f"*.{ext}"))
-                if files:
-                    subtitle_file = files[0]
-                    break
+        # Get video title via oembed API
+        title = await get_video_title(video_id)
 
-            if not subtitle_file:
-                # Check for auto-generated subtitles
-                available_subs = info.get("subtitles", {})
-                auto_subs = info.get("automatic_captions", {})
+        return {"title": title, "transcript": full_transcript, "video_id": video_id}
 
-                if not available_subs and not auto_subs:
-                    raise ValueError("No subtitles available for this video")
-
-                raise ValueError(
-                    f"Subtitles exist but download failed. Available: {list(available_subs.keys()) + list(auto_subs.keys())}"
-                )
-
-            # Parse the subtitle file
-            transcript = parse_vtt_file(subtitle_file)
-
-            return {"title": title, "transcript": transcript, "video_id": video_id}
+    except TranscriptsDisabled:
+        raise ValueError("Transcripts are disabled for this video")
+    except VideoUnavailable:
+        raise ValueError("Video is unavailable")
+    except NoTranscriptFound:
+        raise ValueError("No transcript found for this video")
 
 
-def parse_vtt_file(file_path: Path) -> str:
-    """Parse VTT file and extract plain text transcript."""
-    content = file_path.read_text(encoding="utf-8")
+async def get_video_title(video_id: str) -> str:
+    """Get video title using oembed API (no authentication required)."""
+    try:
+        url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("title", f"YouTube Video {video_id}")
+    except Exception:
+        pass
 
-    # Remove VTT header
-    lines = content.split("\n")
-    text_lines = []
-    skip_next = False
-
-    for line in lines:
-        line = line.strip()
-
-        # Skip WEBVTT header and metadata
-        if line.startswith("WEBVTT") or line.startswith("Kind:") or line.startswith("Language:"):
-            continue
-
-        # Skip timestamp lines (e.g., "00:00:00.000 --> 00:00:02.000")
-        if "-->" in line:
-            skip_next = False
-            continue
-
-        # Skip cue identifiers (numeric lines before timestamps)
-        if line.isdigit():
-            continue
-
-        # Skip empty lines
-        if not line:
-            continue
-
-        # Remove VTT formatting tags like <c>, </c>, <00:00:00.000>
-        clean_line = re.sub(r"<[^>]+>", "", line)
-        clean_line = clean_line.strip()
-
-        if clean_line and clean_line not in text_lines[-1:]:
-            text_lines.append(clean_line)
-
-    # Join and clean up the transcript
-    transcript = " ".join(text_lines)
-
-    # Remove duplicate phrases that often appear in auto-generated subtitles
-    transcript = re.sub(r"(\b\w+\b)( \1)+", r"\1", transcript)
-
-    return transcript
+    return f"YouTube Video {video_id}"
