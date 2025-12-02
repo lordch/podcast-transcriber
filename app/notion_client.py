@@ -21,6 +21,64 @@ class NotionClient:
             "Content-Type": "application/json",
         }
 
+    async def get_pending_items(self, database_id: str, limit: int = 1) -> list[dict]:
+        """
+        Query database for items with Status = Pending (or empty status).
+
+        Returns list of pages with their id, title, and url.
+        """
+        url = f"{NOTION_API_BASE}/databases/{database_id}/query"
+
+        # Query for items where Status is "Pending" or empty
+        data = {
+            "filter": {
+                "or": [
+                    {"property": "Status", "select": {"equals": "Pending"}},
+                    {"property": "Status", "select": {"is_empty": True}},
+                ]
+            },
+            "sorts": [{"timestamp": "created_time", "direction": "ascending"}],
+            "page_size": limit,
+        }
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(url, headers=self.headers, json=data)
+            response.raise_for_status()
+            result = response.json()
+
+        pages = []
+        for page in result.get("results", []):
+            page_id = page["id"]
+            properties = page.get("properties", {})
+
+            # Extract title from Name or Title property
+            title = ""
+            for prop_name in ["Name", "Title", "name", "title"]:
+                if prop_name in properties:
+                    title_prop = properties[prop_name]
+                    if title_prop.get("type") == "title":
+                        title_items = title_prop.get("title", [])
+                        if title_items:
+                            title = title_items[0].get("plain_text", "")
+                        break
+
+            # Extract URL from URL property
+            content_url = ""
+            for prop_name in ["URL", "url", "Link", "link", "Source", "source"]:
+                if prop_name in properties:
+                    url_prop = properties[prop_name]
+                    if url_prop.get("type") == "url":
+                        content_url = url_prop.get("url") or ""
+                        break
+
+            pages.append({
+                "page_id": page_id,
+                "title": title,
+                "url": content_url,
+            })
+
+        return pages
+
     async def update_page_status(
         self,
         page_id: str,

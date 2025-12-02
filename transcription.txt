@@ -1,0 +1,665 @@
+[0.00s -> 5.20s]  Now with Gemini 3.0, if we look at the benchmarks, it can do things where you ask it to code an entire
+[5.20s -> 9.36s]  project and it'll sit there for six, seven minutes and then complete the answer for you.
+[9.36s -> 14.24s]  Somebody's just tried a project-oiler problem and Gemini spent six minutes and solved it right
+[14.24s -> 19.04s]  and in that time it was making multiple tool calls, getting multiple results, fixing multiple areas
+[19.04s -> 22.40s]  right right in the code like multiple times and then it finally got to a final answer.
+[22.40s -> 28.88s]  So we moved from a very simple like one or two turn interaction that happens relatively quickly
+[28.88s -> 34.80s]  with some precision to now the scenario where these models are doing self-sufficient behavior
+[34.80s -> 39.92s]  of self-complex tasks. That was Ravencuma from Google DeepMind talking about the massive
+[39.92s -> 45.36s]  leaps in model reasoning we're seeing with Gemini 3 but the implication for product builders is
+[45.36s -> 50.48s]  also huge because the models are fixing their own errors, builders are literally tearing out the
+[50.48s -> 56.56s]  functionality they built just months ago ripping out the defensive coding and reshipping agent harnesses
+[56.56s -> 61.68s]  entirely. We're seeing this with tools like Claude Code and Manus and as Raven explains
+[61.68s -> 66.00s]  this cycle of destruction and rebuilding is happening inside Google right now.
+[86.56s -> 98.72s]  Three days ago, Google released Gemini 3 and I was fortunate enough to be able to record an
+[98.72s -> 105.20s]  impromptu podcast with Ravencuma from Google DeepMind. In this chat, Raven breaks down exactly why
+[105.20s -> 110.64s]  the rapid evolution of models like Gemini 3 is changing how we build software but we go much
+[110.72s -> 117.20s]  further than just the models. Raven and I explore the quote unquote two cultures of AI agents.
+[117.20s -> 123.04s]  How to decide when you need strict deterministic-esque workflows versus when you should unleash high
+[123.04s -> 129.52s]  agency autonomous systems. We also get a rare look inside the product mindset at Google. Raven shares
+[129.52s -> 134.88s]  the backstory of building notebook LM taking us from the initial vibe coding phase all the way to
+[134.88s -> 141.28s]  production and sharing what they learn about user control after shipping those viral audio
+[141.28s -> 146.64s]  overviews. And for the real builders out there, we get technical. We talk about the art and science of
+[146.64s -> 152.64s]  context engineering. Why needle in a haystack is often just a vanity metric and why building robust
+[152.64s -> 157.76s]  eval and agent harnesses is one of the biggest competitive modes you can have right now.
+[158.32s -> 163.84s]  This is a high signal conversation on exactly what changes when you move from simple chat bots
+[163.84s -> 169.92s]  to complex agentic systems. I'm Hugo Mount Anderson and welcome to Vanishing Gradients.
+[171.04s -> 177.28s]  Hello there everybody and welcome to a very special impromptu live podcast I'm doing with Raven
+[177.28s -> 182.24s]  Kumar from DeepMind. What is up, Raven? I'm excited to be here again with you. I'm always great
+[182.24s -> 187.68s]  being on this podcast. Yeah, so it's always so much fun to chat and it's just great to do things in
+[187.68s -> 192.64s]  public as well. We have so many fun conversations where I learn a bunch so I love sharing it with the world
+[192.64s -> 199.12s]  and just welcome everyone and thanks for joining. So impromptu Lee, if that's a term, this is Vanishing
+[199.12s -> 205.44s]  Gradients, the data science machine learning and now we call it an AI podcast. The Q&A will happen
+[205.44s -> 211.20s]  in Discord and I've put the link in the description, jump into the podcasts channel. Any questions
+[211.20s -> 215.20s]  would be excited to answer and engage with you all. We just do that so we can follow up afterwards
+[215.20s -> 219.76s]  as well and continue the conversation. If you like this type of stuff, please do hit like and subscribe
+[219.84s -> 226.72s]  and share with friends. I just saw a few things about Raven. Raven is a researcher at DeepMind.
+[226.72s -> 232.64s]  For the last decade he's focused on applied generative models, previously built bespoke,
+[232.64s -> 239.04s]  probabilistic Bayesian models for organizations like SpaceX and more recently been working on LLM
+[239.04s -> 245.12s]  such as Gemma and Gemini. It contributed both the products, notebook LLM project and project
+[245.20s -> 249.04s]  Mariner. We're going to chat about all these types of things today with a focus on AI
+[249.04s -> 255.52s]  evaluation and agent evaluation for products as well but also I woke up this morning and saw Gemma
+[255.52s -> 264.56s]  3. So many congrats, Raven. Gemini 3. Gemini 3. I'm sorry, yes. I was too excited, yes, of course
+[264.56s -> 270.56s]  I knew that but many congrats on Gemini 3. Thank you. So is there anything by way of introduction that
+[270.56s -> 275.92s]  I missed or got wrong that you'd like to correct or at? No, but I'm sure most of you listen to
+[275.92s -> 280.40s]  know you but if those you don't Hugo has been a long time calling in friend I met him on the data
+[280.40s -> 286.16s]  science track of sci-fi and pi data where he was putting together really great tutorials and things
+[286.16s -> 292.32s]  like that. So it's just been an interesting decade like you said working from tiny numpires now
+[292.32s -> 298.40s]  scaling up to gazillions of parameters with the current ecosystem. It's super exciting and so that's
+[298.40s -> 303.84s]  actually a lovely point to jump off from even just thinking about the AI ecosystem and what's
+[304.64s -> 314.00s]  changed over the past several years. So let's rewind two and a half plus years to I think January 2023
+[314.00s -> 320.08s]  open AI released something called function calling and everyone else soon followed but we had that
+[320.08s -> 327.52s]  introduced the ability of elements to use tools and we got JSON mode and those things. So I'd love just
+[327.52s -> 334.80s]  your take on the history from what's happened in the past few years with the agentic space moving
+[334.80s -> 340.56s]  from basic function to calling to what we're seeing in the agentic landscape today. Yeah and let's
+[340.56s -> 345.44s]  actually to frame this let's rewind a tiny bit more into the models on themselves and we'll move for it.
+[345.44s -> 351.44s]  So I write around actually a decade ago which seems to be a good mark. Before you and I worked on LMS
+[351.44s -> 356.08s]  LMS were really good at completing text. You would have what is it but we now call pre-trained LMS
+[356.08s -> 360.08s]  but if you look at everything say gpt 2 blog post they talk a lot about how the LMS would take
+[360.08s -> 364.40s]  a piece of text and it would complete it like it finished a sentence it would finish if you put it
+[364.40s -> 369.04s]  in some Shakespeare quote it would finish it. So let's call this completion LMS. The next sort of
+[369.04s -> 373.12s]  thing that happened was what instruction tuning is it's called a Google release a paper called
+[373.12s -> 379.60s]  flon and then the most famous one obviously is chat tpt. These are LMS that now have the ability to
+[379.60s -> 385.76s]  understand and follow instructions but generally the idea is they can chat like chat tpt
+[385.84s -> 390.16s]  obviously is a famous name but we have a Gemini and many other models as well. These are probably
+[390.16s -> 394.88s]  the models and most people use I'd say probably 99.9% of people use the models in this way. They go to
+[394.88s -> 399.52s]  Gemini.google.com or they go to a Gemini model they say hey give me your rest of your eggs and you get
+[399.52s -> 405.04s]  recipes back. That's a natural language instruction but something a lot of us notice at once even within
+[405.04s -> 410.96s]  Google is you could also put LMS in this like third mode and you could say hey you have a function
+[411.68s -> 416.64s]  calculate dates or get weather is a very canonical example and you just say in some what we
+[416.64s -> 420.96s]  now call system instruction you you know answer to our users normal if they ask for eggs or things
+[420.96s -> 425.28s]  like that but if they happen to ask about the weather you can respond in this very particular way.
+[425.28s -> 432.16s]  You can create this format and emit that and that would be a great response or you'll say
+[432.16s -> 437.12s]  if these instructions you can call this function and so now if you say hey what's the weather the
+[437.12s -> 441.52s]  LMS can do something else instead of just hallucinating what the weather is because LMS don't have
+[441.52s -> 447.36s]  access to the weather by themselves they could actually produce the string that the inference side or
+[447.36s -> 452.40s]  your computer or the serving platform could detect and it could actually go then grab the weather
+[452.40s -> 458.00s]  put it back into the context and then respond and that is what we call what is now called tool calling
+[458.00s -> 463.04s]  or function calling so this is to go into this again there's three modalities of LMS completion
+[463.04s -> 469.04s]  mode chat mode and now function calling slash tool calling mode and just one quick thing before I
+[469.04s -> 472.96s]  give back to you here you go tool calling and function calling are used very interchangeably so you
+[472.96s -> 478.64s]  might hear say tool calling or function calling for the purposes of this this podcast just treat
+[478.64s -> 483.36s]  tool calling and function calling to be the same and will agent will mean something else in a second
+[483.36s -> 487.60s]  another very conflated and overlapping term but we'll get the agent in a moment but here you go I'll
+[487.60s -> 493.20s]  throw it back to you so can you see my screen I sure can that's what I see the great ducks yeah and
+[493.20s -> 498.64s]  this is from Gemini right yes so this actually talks about how function calling works and a lot of
+[498.64s -> 502.72s]  the time you don't need to do this yourself I think it's good to to do it some of the time particularly
+[502.72s -> 508.64s]  when learning how these things work but one gotcha is that there are actually two LLM calls right
+[508.64s -> 516.08s]  you pass the initial prompt and the LLM will trigger a tool call if internally it seems like
+[516.08s -> 521.68s]  that's the correct thing to do and modern LLMs that they used to be really bad and we'll get to this
+[521.68s -> 526.64s]  they used to be proud at figuring out when to call a tool or not now they're a lot better and we can
+[526.64s -> 531.84s]  get to the implications of that and then if there's a tool call then you'll pass it back the result
+[531.84s -> 536.80s]  of the tool call into the function so we see that in this schematic the other thing that I really like
+[536.80s -> 542.40s]  is and this is an example that we use in the course and it's the weather API in fact if you say what's
+[542.40s -> 547.92s]  the weather in Sydney what and you provide it provide the LLM with a good description for the
+[547.92s -> 555.28s]  tool call and telling it that it actually needs latitude and longitude most LLMs will actually take
+[555.28s -> 559.84s]  Sydney and convert it to latitude and longitude under the hood without you're asking it to because it
+[559.84s -> 567.52s]  quote unquote knows that's what the API expects yeah to summarize that real quick there is a it is a
+[567.52s -> 571.84s]  much more complex set of interactions between the model the user in the interaction environment then a
+[571.84s -> 579.04s]  simple chat response like what is the capital of Australia which is a single return usually exactly
+[579.04s -> 585.44s]  cool so let's we've got to that point in in history let's move on from and this is a tool calling
+[585.44s -> 592.64s]  is not just weather APIs it's the ability to ping Google Drive or email or Slack or create slide decks
+[592.64s -> 599.12s]  and all of these things coding coding is it from now now there's terminal bench we're typing and
+[599.12s -> 603.92s]  see like him and we have Gemini CLI there's interacting with the browser if in the most extreme
+[603.92s -> 611.20s]  scenario you have robotics so a physical robot is a tool that an LLM and Gemini robotics can use so
+[611.20s -> 617.04s]  this space has gotten really big really fast so what happened next so I think it's basically what you
+[617.04s -> 621.84s]  summarize and actually it's fantastic that we're talking on a Gemini three day to the folks out there
+[621.84s -> 626.24s]  Hugo and I have pushed this session a couple times and we switched it to a podcast because every time
+[626.24s -> 631.20s]  I talk to Hugo it's like there's so much happening so fast that if we do workshop now it's going to
+[631.20s -> 637.12s]  be out of date and now with the Gemini Gemini three launch today you can see how that is like true I
+[637.12s -> 640.72s]  wouldn't we wouldn't have had the time to put together workshop given it just released this morning
+[640.72s -> 645.36s]  and that's the answer to your question here go is that Gemini 1.0 was released when I was on that
+[645.36s -> 650.24s]  release I think it was December 2023 which was just a little bit I look actually just two years ago
+[650.24s -> 654.72s]  honest a little less than two years ago and that had basic I don't actually know if we supported
+[654.72s -> 658.00s]  tool calling the API like I'm starting to even forget I think we might have only released
+[658.00s -> 664.00s]  tool calling in Gemini 1.5 in December or sorry in February 2024 and so we went from very simple
+[664.00s -> 672.32s]  tool calls to get weather and quickly we've gone to in 17 months gone to LLM's and now are just
+[672.32s -> 679.20s]  doing fantastic on very complex multi-step multi-hop type of agentic behavior so previously as Hugo
+[679.20s -> 684.00s]  was saying and he showed you the graph and LLM was good at maybe like those two turns it go one side
+[684.00s -> 686.80s]  it would get the weather and come back and get the natural language and we were amazed that it
+[686.80s -> 693.12s]  was able to do that very well now it was Gemini 3.0 if we look at the benchmarks it can do things where
+[693.12s -> 697.52s]  you ask it to code an entire project and it'll sit there for six seven minutes and then complete
+[697.52s -> 702.00s]  the answer for you something that I just on how can you for instance is somebody said they just
+[702.00s -> 706.96s]  tried a project or a problem and Gemini spent six minutes and solved it right and in that time it
+[706.96s -> 711.84s]  was making multiple tool calls getting multiple results fixing multiple areas right right in the code
+[711.84s -> 716.72s]  like multiple times and it finally got to a final answer so we moved from a very simple like
+[717.28s -> 723.76s]  one or two turn interaction that happens relatively quickly with some precision to now the scenario
+[723.76s -> 729.28s]  where these models are doing self-sufficient behavior over five minutes of self-complex tasks
+[729.28s -> 733.60s]  it's a huge jump maybe the other way I can put this to put this at timescale when I started
+[733.60s -> 738.48s]  learning Python it took me like a year to get the basics down and it took another four five just to
+[739.28s -> 744.80s]  get good at coding a solid like open source project and that was me as a human learning
+[744.80s -> 750.48s]  now Gemini went from creating a basic function 18 months ago to like probably writing entire
+[750.48s -> 754.48s]  libraries that Hugo and I wrote overnight without our intervention like some of the simpler stuff
+[754.48s -> 760.00s]  you and I used to write it in our open source like Beijing days absolutely and it's just moving so fast
+[760.00s -> 765.60s]  okay yeah and I am I'll actually link to this I did a pod another podcast I do high signal with
+[765.60s -> 771.28s]  Lance Martin last week from Langshan and he used to work he used to work on self-driving at Uber actually
+[771.28s -> 776.64s]  and he from the work he does at Langshan he just says so much insight into how people are building today
+[776.64s -> 785.44s]  and he mentioned two examples one is Manus where because of the just the hyper speed in model
+[785.44s -> 792.16s]  improvement they've essentially ripped out their product five times this year and rebuilt it
+[792.24s -> 796.64s]  particularly what we're now calling an agent harness which is essentially all the tool calls and
+[796.64s -> 803.92s]  all the things that help something be an LMB agentic and also Claude code part of their product is
+[803.92s -> 810.96s]  model another part is the harness around it and as the model improves they essentially rip out
+[810.96s -> 819.76s]  the harness each time as well so it's actually changed the way we build software right yeah I think
+[819.76s -> 824.88s]  here to that point it's even internally within Google like I've rewritten agentic harnesses like
+[824.88s -> 828.80s]  three times in the last three years because Gemini gets so good that I don't need to check for certain
+[828.80s -> 834.08s]  things or I can just defer into the entire of the model but on the other side we keep doing more
+[834.08s -> 839.04s]  and more complex things so I need to build new harnesses for more more complex sets of behaviors
+[839.04s -> 844.48s]  than ever before like it's basically here it's you're deleting the old part and you're adding the
+[844.48s -> 849.52s]  new part and it's just the shifting window constantly yeah so we've got some great questions in the
+[849.52s -> 856.64s]  chat from Pastor and Julian both such wonderful contributors and members of the community they're
+[856.64s -> 861.60s]  somewhat related so I'm gonna ask them together breaking a cardinal scene of podcasting but Julian
+[861.60s -> 866.32s]  wants to know has Gemini tree introduced any additional capabilities relative to the diagram where we
+[866.32s -> 872.40s]  have the one we showed right and Pastor asks can we use decision nodes or something similar to change
+[872.40s -> 879.28s]  the type of response like if it's see if it uses a tool can we try to push it to have a chat response
+[879.28s -> 885.84s]  instead and I've done that using prompting myself for the most part but yeah I'm interested in in
+[885.84s -> 892.56s]  those so one is Gemini if you're using basic tool calling Gemini 3.0 we'll just still do the API
+[892.56s -> 898.72s]  that you saw is totally still so legit you can still use it with your current workflows it should just
+[898.72s -> 904.96s]  work much better with much more complex complex tools so that's if you're using the API you're also
+[904.96s -> 909.04s]  welcome to then build your own agentic system and we'll talk a bit about my this on top of the
+[909.04s -> 914.64s]  right API you can you don't have to follow that diagram exactly like if you know you're some crazy
+[914.64s -> 919.20s]  custom cool project that you want to build on the top of Gemini you can build your own flows and just
+[919.20s -> 924.24s]  get a layer down deeper and route things your own way make multiple tool calls and incorporate images
+[924.24s -> 930.56s]  or audio or whatever you want you have the I word this you have the standard way of just doing
+[930.56s -> 934.56s]  functional and tool calls but if you want to build a crazy or agent that's totally bespoke you have
+[934.56s -> 939.76s]  all the ability to do that yourself as well using the Gemini API totally and it's actually
+[939.76s -> 947.52s]  something I have started to refer to as the two cultures of agents in AI essentially but one way
+[947.52s -> 954.40s]  to the first way to do this is actually using workflows right and I'm going to just share my screen
+[954.40s -> 961.36s]  talk it through for people who aren't watching but merely listening can you now see sick building
+[961.36s -> 968.16s]  effective AI agents yeah so this is as you know the ontropic post from December last year that I
+[968.16s -> 973.12s]  probably talk about a bit too much but it was so instructive they tell us about augmenting LLMs
+[973.12s -> 977.52s]  to move along the agentic spectrums LLMs are stateless so introducing read and write for memory
+[977.52s -> 983.44s]  tool calls retrieval all incredibly important things and then starting to do prompt
+[983.44s -> 989.60s]  chaining right so we can build start building workflows together and there are all types of
+[989.60s -> 996.40s]  different workflows we do one I really like is the evaluator optimizer one and so this is one way
+[996.40s -> 1002.88s]  to start building agents and if you do want more bespoke workflows and to dictate what your LLMs are
+[1002.88s -> 1009.36s]  doing this is a great way to do it the other end of the spectrum is really you're lowering it and
+[1009.36s -> 1015.76s]  it's very difficult to evaluate in a lot of ways but building large agentic systems with an end user
+[1015.76s -> 1021.44s]  who maybe yourself but like a human in the loop with strong supervision so that's I've always told
+[1021.44s -> 1027.44s]  people to start with these types of things but that's when you're trying to build consistent reliable
+[1027.44s -> 1034.00s]  software which we're not always trying to do for example I use AI assisted coding daily and I wouldn't
+[1034.00s -> 1040.56s]  call that consistent or reliable unless there's strong supervision so when you have high agency you
+[1040.56s -> 1044.48s]  need strong supervision as well so I'm interested in your thoughts on kind of these two cultures
+[1045.84s -> 1049.52s]  I think you're correct from this I think there's some folks these models can do so much so there's
+[1049.52s -> 1054.00s]  some folks that just need just reliable I need a function I need to be called and that's all I got
+[1054.00s -> 1059.12s]  then yeah using the basic API is great but now I am there's a lot of different ways we can stack these
+[1059.12s -> 1063.76s]  models together and that blog post and retropic was one good way of doing it there's even more when
+[1063.76s -> 1068.40s]  you consider all the ways these LLMs can be used they could be used synchronously they could use
+[1068.40s -> 1074.00s]  to be used asynchronously like we could you and I could vibe code and using a use Gemini two ways we
+[1074.00s -> 1080.56s]  could vibe code a podcast summarizer and we'll use it like in a dev agentic workflow and synchronously
+[1080.56s -> 1085.44s]  and that's one set of product and one workflow and then that we could be coding something that takes
+[1085.44s -> 1089.12s]  us podcasts and summarizes it in terms of it in a newsletter like async right and that's another
+[1089.12s -> 1095.84s]  workflow with the same the same model so I think to your point there's like the dead simple case which
+[1095.84s -> 1102.64s]  is great the router case but now there's many under ways to again put these models together in
+[1102.64s -> 1106.64s]  different different workflows with different modalities and also to your point different risk levels
+[1106.64s -> 1111.76s]  I have to say when I'm vibe coding a project at home I don't I just let the model run for five minutes
+[1111.76s -> 1116.08s]  if I get an output that looks good I feel great and I'm just good to go but even in Google when I'm
+[1116.08s -> 1120.32s]  coding for modeling internally like I need to really check the code unless vibe coding I'm more
+[1120.32s -> 1125.28s]  precisely like instructing my model or my agents a lot of what you and I are going to come to you is
+[1125.28s -> 1130.40s]  it comes down to your use case and what you need and what you can tolerate for how you decide
+[1130.40s -> 1135.36s]  to structure and use these models and Evalon absolutely so we'll get to Evalon a second but I
+[1135.36s -> 1140.16s]  love that you mentioned let it go for five minutes and the time is actually a really important
+[1140.16s -> 1147.04s]  consideration here so I've been using Manus recently for doing research for me there's actually Manus
+[1147.04s -> 1153.36s]  Mail which so let's say I'm going to do a podcast with someone I can just CC Manus Mail and it will
+[1153.36s -> 1157.92s]  go off and say hey can you research all the topics we've discussed in this email thread and it will
+[1157.92s -> 1164.24s]  go off and create a comprehensive summary that it would usually take me three hours to do with all
+[1164.24s -> 1169.04s]  types of links and references and it returns that in about 10 minutes which is great because then I
+[1169.04s -> 1174.24s]  can interact with it get it to do a bit more back and forth and so on whereas if it took several hours
+[1174.24s -> 1180.08s]  that wouldn't work for me so when there's high agency having high supervision but also on a time
+[1180.08s -> 1186.80s]  scale that matches the workflow what needs also. Before moving on to evaluation Pastel has another
+[1186.80s -> 1194.24s]  question which is so good as models get better and better will they require fewer tools or and
+[1194.24s -> 1199.92s]  orchestration to get the responses we want good responses. Oh I actually have the opposite answer so
+[1199.92s -> 1205.04s]  one is maybe less orchestration actually okay so there's a couple of factors I think for if you keep
+[1205.04s -> 1209.84s]  the task complexity fixed they're requiring less orchestration I actually posted about this and
+[1209.84s -> 1214.16s]  linked in just like a 30 minutes ago. There's some problems with Gemini 3 that I've noticed is
+[1214.16s -> 1220.16s]  take less instruction like orchestration than they did before but as they as we put them in more
+[1220.16s -> 1224.32s]  and more complex scenarios sometimes you have more orchestration they match the complexity of your task
+[1224.32s -> 1228.72s]  this I like food a lot so I'll give you that dumb example and I like Hugo these Australians so I'll
+[1228.72s -> 1232.00s]  give you the stupid dumb example if you're going to make a tips in my mind sandwich there's really not
+[1232.00s -> 1239.52s]  much destruction needed. That's worse than my Gemini my Gemini Gemini Gemafoo. My cousins are New Zealand
+[1239.60s -> 1245.28s]  from the Kiwi so I was I was switched to Marmite. Yes Veggie Might sandwich it's not a complex it's
+[1245.28s -> 1250.40s]  not a complex dish right so previously maybe you'd have to really precise the LLM oh go grab white bread
+[1250.40s -> 1254.88s]  go grab Marmite or Veggie Might depending on which country you're in you'd have to be really
+[1254.88s -> 1258.88s]  precise and you'd have to say put it together but now you can say who goes Australian make it make
+[1258.88s -> 1262.64s]  him a sandwich with the correct one and it'll just know you don't have to tell it whether it's
+[1262.64s -> 1266.88s]  Veggie Might or Marmite but now we're taking these models and we're having them do super complex things
+[1266.88s -> 1272.24s]  so we're having it make like Michelin start and meals and so now you go back to a large prompt
+[1272.24s -> 1278.32s]  because the task complexity is increased so one I'd say if you keep taxing plus to the same my experience
+[1278.32s -> 1282.16s]  has been you need less destruction but I've noticed that we just push the models into more complex
+[1282.16s -> 1287.60s]  scenarios so the tax plus the instruction complexity stays about the same but you're getting a more
+[1287.60s -> 1292.40s]  complex task done. The other part of your question was are more or less tools needed. Actually I think
+[1292.40s -> 1296.16s]  more tools are better now because now the model is able to differentiate between more tools than ever
+[1296.16s -> 1301.20s]  before so previously we really only could put like one to five tools in context if you put too many
+[1301.20s -> 1307.44s]  the model confused it wouldn't be able to do like a wide variety of tasks but now with especially with
+[1307.44s -> 1312.40s]  the Gemini models you could put like 10 functions in you could put more than you have been able to with
+[1312.40s -> 1316.88s]  the older models and it's able to differentiate and do more things and now you have a more flexible agent
+[1316.88s -> 1321.52s]  that can both get the wider and make you a sandwich and it's able to do more pussy you'd have to make
+[1321.52s -> 1325.12s]  a wider bot and you have to make a sandwich bot and you have to keep the context separated because the model
+[1325.28s -> 1331.36s]  confused between the two modalities or the two structures that's totally agree and to just reiterate
+[1331.84s -> 1338.48s]  as these models get far better at using the right tool there are less failure modes in the number
+[1338.48s -> 1343.60s]  of tools we're using currently so we can increase that. I would also add a depends on your definition
+[1343.60s -> 1350.24s]  of what an individual tool is because if you if you have a web search tool and a bash tool you get
+[1350.24s -> 1355.52s]  really far right and you could be like oh I have a grep tool and another bash tool it's all
+[1355.52s -> 1361.84s]  bash essentially right so I think it's worth noting that the other thing just slide note side note
+[1361.84s -> 1367.36s]  I know we're all the spaces super obsessed with semantic search but don't forget lexical search and
+[1367.36s -> 1374.80s]  hybrid search is super important and in fact you may notice that coding tools use grep for the most
+[1374.80s -> 1380.96s]  part it's one of the most important tools that they have in helping you re-code. Reven I am interested
+[1380.96s -> 1391.12s]  now in thinking a bit about evaluation so I think I want to get to more complex stuff but if someone's
+[1391.12s -> 1397.60s]  building an agentic system for the first time what's like the minimum evaluation setup needed
+[1397.60s -> 1403.28s]  before releasing it to real users. So I think I'm going to answer your question in two different ways
+[1403.28s -> 1408.40s]  one is if it's the first time you're ever building a system like an agentic system I strongly
+[1408.40s -> 1413.44s]  suggest you go back and just do the get weather example yourself implement it yourself with even with
+[1413.44s -> 1418.56s]  an open model like a like Gemma which is my favorite obviously and just really understand what's going
+[1418.56s -> 1423.68s]  on under the hood there's always this concept of leaky abstractions I have to say and LM's are a
+[1423.68s -> 1427.92s]  bit of a leaky abstraction like when they work when they're in really polished interfaces like Gemma
+[1428.56s -> 1435.04s]  or Marien or things like that you're getting this really clean great polished feel but you're not
+[1435.04s -> 1439.92s]  seeing the complexity that's under the hood that's that got that system to that state and in particular
+[1439.92s -> 1445.28s]  all the the roadblocks and the dead ends that we ran into from the modeling side and the product
+[1445.28s -> 1450.16s]  building side that let us get to this really good product so if you go down and you build it yourself
+[1450.16s -> 1454.96s]  you'll understand all the pieces and where they're going so my first suggestion is start with the
+[1454.96s -> 1460.16s]  fundamentals go learn basic tool calling and how LM's create those generations particularly using
+[1460.16s -> 1464.80s]  an open model even if you're not planning to use an open model just understand how the flow works
+[1464.80s -> 1470.16s]  and I will link to a workshop that we did exactly on on this in the show notes like um
+[1470.16s -> 1475.52s]  yes you want to do this because then you have a good sense of how to build a product and also your
+[1475.52s -> 1480.32s]  evaluation for your more complex thing so the second part you asked is like how what should you do
+[1480.32s -> 1483.92s]  before you get to your first user this is actually the same answer I'm going to have whether you're
+[1483.92s -> 1489.04s]  building an agent project or non-agentic product there's always like a good tension here uh
+[1489.04s -> 1493.68s]  if you want to get it good enough where your user's going to get what you're trying to do but then once
+[1493.68s -> 1497.92s]  you get there you want to release it's my opinion as fast as possible because the way your users use
+[1497.92s -> 1501.60s]  your model is going to be different the way you think you need to use your models because with every
+[1501.60s -> 1505.52s]  product you're going to have this stage where you're building it yourself you're thinking this is
+[1505.52s -> 1510.32s]  going to be really neat people are going to love it and you're coming with your own view of how
+[1510.32s -> 1513.92s]  you're going to use this product but also your own biases like for instance I test a lot in
+[1513.92s -> 1517.36s]  english and kodrathe because those are the two languages that I know but I don't test a lot in
+[1517.36s -> 1522.96s]  like korean and japanese because I don't know those languages nearly as well so I get the basics down
+[1522.96s -> 1526.96s]  with what I know and then as soon as I get to users I see all the things that I didn't think of
+[1526.96s -> 1532.40s]  it's a bit scary but it helps because then you can iterate on your your product faster using a
+[1532.40s -> 1536.72s]  full feedback loop from the user rather than just your own feedback loop now for a word from
+[1536.72s -> 1544.16s]  our sponsor which is well me I teach a course called building AI powered software for data
+[1544.16s -> 1548.80s]  scientists and software engineers with my friend and colleagues Stefan Krauchik who works on agent
+[1548.80s -> 1554.48s]  force and AI agent infrastructure at sales force it's designed for people who want to go beyond
+[1554.48s -> 1561.28s]  prototypes and actually ship AI powered systems the links in the show notes absolutely and I actually
+[1561.36s -> 1568.48s]  what I'm trying to do is bring up just a slide you whoa I didn't mean to turn my camera off
+[1568.48s -> 1574.96s]  I meant to share my screen again you came and just gave such a wonderful guest talk in our course
+[1574.96s -> 1582.56s]  last week and there's one slide which is actually very relevant to this part of the conversation
+[1582.56s -> 1588.00s]  so let me just bring this up can you see oh just sit cannot see anything at the moment can you see
+[1588.00s -> 1594.56s]  your slide yes yeah this is the talking of last week yeah exactly so I think this speaks to
+[1594.56s -> 1598.72s]  you came and talked about products that you've worked on such as notebook LM right so maybe you can
+[1598.72s -> 1604.40s]  just reorient us to to this slide as well yeah so there's you've come up with a cool product idea
+[1604.40s -> 1608.16s]  it's all really only in your head these days which is really great you can use you can use
+[1608.16s -> 1612.56s]  Gemini or any coding tool to quickly build this prototype yourself including the visuals now and then
+[1612.56s -> 1618.08s]  up and then like you really can build all aspects of a product with with AI code visuals design
+[1618.08s -> 1622.88s]  website like the whole deal but this is before you have your first user now you obviously don't want
+[1622.88s -> 1627.04s]  to release something that's totally broken to users so you're going to have your own e-vals sets
+[1627.04s -> 1631.68s]  you're you're probably set with vibe e-vals which is you just making stuff on the spot but as he
+[1631.68s -> 1636.56s]  go ahead alluded to earlier you're going to quickly also want to build an e-vall harness which is
+[1636.56s -> 1641.84s]  like a structured way to run your e-vals over and over again now you'll have a structured way to run
+[1641.84s -> 1647.28s]  your e-vals but you'll only have prompts for yourself like the e-vals set is really just things
+[1647.28s -> 1652.72s]  that you have thought of and maybe some close friends or some close partners but it's a really small
+[1652.72s -> 1657.52s]  set of what all possible if people could do but anyhow you use you're going to use this e-vals set
+[1657.52s -> 1661.60s]  to help you refine the product until you get to a point where you think it's good enough
+[1661.60s -> 1666.56s]  and it's reliable for your use case it could be generating podcasts like notebook LM audio
+[1666.56s -> 1670.96s]  reviews which is launched last year it could be a mariner which is browsing through the internet
+[1670.96s -> 1676.48s]  or on the genocide it could be answering MMLU questions whatever and maybe but my suggestion is
+[1676.48s -> 1679.92s]  you're probably going to want to you want to get the users probably quicker than you sooner rather
+[1679.92s -> 1684.40s]  than later the reason is your users themselves are going to teach you so many things about your product
+[1684.40s -> 1688.56s]  that you never could have anticipated they're going to use it one is they could try things on the
+[1688.56s -> 1692.72s]  positive side and see use case that you never thought of that you want to build it immediately so that's
+[1692.80s -> 1697.04s]  one great use case for instance a notebook LM audio review something we noticed is people really
+[1697.04s -> 1702.24s]  wanted more control over the podcast initial product only had one click button and you would get
+[1702.24s -> 1705.92s]  you would just get what you get now people love what you got but they also wanted some fine tuning
+[1705.92s -> 1710.64s]  and some customized ability and so we learned that because we launched the product on the negative
+[1710.64s -> 1714.72s]  case you'll learn that the product isn't as good as you thought it was in other areas like again maybe
+[1714.72s -> 1718.64s]  I keep hallucinating the difference between Vegemite and Marmite and offending your Australian and
+[1718.64s -> 1723.52s]  Kiwi customers if you're in the US or Europe or Asia you probably never think about this but
+[1723.52s -> 1727.76s]  you're Australian and New Zealand users are going to think about it a lot now you're going to see
+[1727.76s -> 1732.88s]  these come in and you'll you can build them into your email set you can say hey make me a sandwich
+[1732.88s -> 1737.68s]  and now I if I go into Hugo and I say make a Marmite sandwich I know he's going to be frustrated
+[1737.68s -> 1742.08s]  as a user and it won't match what his experience is but because you've already built the harness it's
+[1742.08s -> 1747.04s]  very easy for you to plug in this new data and because you have users you have a very fast feedback loop
+[1747.04s -> 1754.08s]  to go from feedback evel harness sorry evel set addition to understanding your product making
+[1754.08s -> 1761.36s]  the fix checking it with your harness again and then deploying it super cool so I now want to actually
+[1761.36s -> 1766.80s]  want to clarify one thing I take less exception to the Marmite mistake now I realize it was Kiwi it was
+[1766.80s -> 1771.28s]  for some reason when it was when I thought you thought when it was because Marmite's British as well
+[1771.28s -> 1776.16s]  that was more concerning again mistaken for being a Kiwi for what that's don't get you wrong
+[1776.16s -> 1783.04s]  love the British so to introduce my next question I want to actually talk we mentioned and evaluation
+[1783.04s -> 1788.80s]  harness as and we've done a workshop on this actually maybe first you can just tell us what an
+[1788.80s -> 1794.40s]  evaluation harness is in your words and then we can get to this and evaluation harness is just a
+[1794.40s -> 1799.36s]  repeatable way to to understand your evel results so again let me sit to a food analogy because I think
+[1799.36s -> 1803.36s]  it's fun and now you I know I know Hugo won't hit me for saying it think about it when you're
+[1803.36s -> 1806.56s]  going to make either a veggie mine or Marmite sandwich you've never done this before you do it the
+[1806.56s -> 1811.28s]  first time you take a bite and you're like oh did I put in a crisp chips in did I get the vegetable
+[1811.28s -> 1815.44s]  might or buy my ratio right is vegetable might or buy my better maybe you're from another country these
+[1815.44s -> 1819.76s]  are things you just buy the first time right but you'll notice that really great chefs they take notes
+[1819.76s -> 1824.24s]  right they'll say that oh today I made a veggie my sandwich I put this many chips in and I tried it
+[1824.24s -> 1830.32s]  and this was like it was too big or too bad that active writing it down and structuring it is a harness
+[1830.32s -> 1835.36s]  it goes from you just taking a bite is vibing it to now you have some structured criteria on the
+[1835.36s -> 1840.08s]  computer side and the AI side why we really care and on the agent side is we want to have a computer
+[1840.08s -> 1845.92s]  run the evel for us so while we could go in and pipe in something like hey agent build me a marmite
+[1845.92s -> 1850.80s]  of regiment sandwich and see whether it doesn't or not we want to do this automatically moving forward
+[1850.80s -> 1856.80s]  and there's two reasons for them one is it saves a lot of time if you automate it so you're going to be
+[1856.80s -> 1860.48s]  running your evel as much more often and getting many more data points vibing it takes a lot of
+[1860.48s -> 1864.48s]  time because you're running one one by one and you'll spend the whole day doing it the second though
+[1864.48s -> 1870.80s]  which speaks to his he goes and I statistician background is it makes it rigorous I'm with vibing it's
+[1870.80s -> 1874.88s]  it's honestly really hard to get the same vibes every single time like you might have a cold one day
+[1874.88s -> 1879.04s]  if you're eating the sandwich it might be you might be really full from another meal like you as a
+[1879.04s -> 1885.28s]  person change your feel depending on time in the hour of the day or what you try but when you have an
+[1885.28s -> 1889.28s]  evel harness everything is structured the test running is structured and the inference side is
+[1889.28s -> 1894.00s]  structured the assessment side is structured and you're getting repeatable results that really are
+[1894.00s -> 1900.64s]  giving you a strong signal of what's different and what's what's not great and so to drill down even
+[1900.64s -> 1905.52s]  deep on this is something that we did in the workshop that I'll link to an evel harness there are
+[1905.52s -> 1912.80s]  many ways to create it but one one really good way to think about it is it's a dot py script that
+[1912.80s -> 1919.44s]  consists of code based checks and perhaps LLM as judge of course you don't always need judges
+[1919.44s -> 1926.80s]  for a lot of things that you can check with code and a gold standard data set of what you expect users
+[1926.80s -> 1931.60s]  to put into your system and what you want to get get out of the system is that how you think about it
+[1931.60s -> 1937.04s]  this exactly what it um and to me now it's in since we're talking about agent evaluation it ends up
+[1937.04s -> 1941.52s]  being a little bit more complex than now than a dot py file and because agents are tend to be more
+[1941.52s -> 1948.40s]  complex but the basic idea is exactly the same and it's a set of like python files yeah yes exactly
+[1948.40s -> 1954.88s]  and a gold data set which is yes perhaps constantly evolving depending on what users are doing so the
+[1954.88s -> 1961.04s]  reason I brought up this wonderful technical report by Chroma collaborating with weights and biases
+[1961.04s -> 1968.48s]  and surround generative benchmarking and what they do is essentially they give a protocol for
+[1969.20s -> 1977.28s]  generating synthetically generating a gold standard data set for information retrieval and search
+[1977.28s -> 1983.04s]  systems okay so I'll link to it there's Kelly has a great video in it as well 12 minute video on
+[1983.04s -> 1987.44s]  YouTube and they have all the notebooks so you can do this yourself so this is for retrieval right
+[1987.44s -> 1993.60s]  and search you may call it rag of course rag is such an amorphous term I think search and retrieval
+[1993.60s -> 1999.04s]  is probably better here so only to that but that's how people think about it for search and they do
+[1999.04s -> 2005.84s]  some wonderful work in aligning one of their judges based on trash anchors work on evalgen I think it
+[2005.84s -> 2011.92s]  is so this is how like current state of the art for doing it in search I'm now wondering and you've
+[2011.92s -> 2019.92s]  already let us here but how do we start thinking about how to build out evales for agents so this is
+[2019.92s -> 2024.00s]  there's going to be multiple levels to it like you said one is if we go back to the chart that you
+[2024.00s -> 2028.80s]  just showed earlier agentic flows are just more inherently complex than the single prompt single generation
+[2028.80s -> 2034.08s]  flow so if you take a can keep using the same example now that we're stuck on it is make me what make
+[2034.08s -> 2038.80s]  me tell me the recipe for a marmite sandwich or a regimen sandwich that the model just has to
+[2038.80s -> 2043.12s]  respond to you and you just eval that one text generation it's actually quite straightforward but in an
+[2043.12s -> 2048.16s]  agentic flow it needs to make a tool call and then it needs to read the response of that tool call
+[2048.16s -> 2052.88s]  and then it needs to write an actual language response in the simplest flow so you're evelling two
+[2052.88s -> 2058.40s]  things that's already twice as complex as the simple case so that's and that's just the most basic
+[2058.40s -> 2061.84s]  functional in case and so you start there you're going to have to eval does it make the function call
+[2061.84s -> 2067.28s]  correct and then you're going to have to eval whether the final response is also quite good and basically
+[2067.28s -> 2072.96s]  that mimics what we do in search and retrieval right you don't you of course you want to end to end
+[2073.04s -> 2078.32s]  evals but a lot of the time you want to look at retrieval quality and look we know how to do that
+[2078.32s -> 2086.16s]  from recommended systems and from classic certs so classically recall first re-rank precision at K
+[2086.16s -> 2090.88s]  something like that and then more sophisticated metrics but making sure your trebles right and then
+[2090.88s -> 2096.56s]  making sure your generations right that's exactly right it's when you start building if we shift
+[2097.12s -> 2102.56s]  and broaden terminology a little bit there's element systems or AI systems research a retrieval would
+[2102.56s -> 2108.00s]  be another one of these things it's it's another component that's added on to an lm and of course
+[2108.00s -> 2112.88s]  you want to eval both pieces independently but you want to eval them together going back to the marbite
+[2112.88s -> 2117.04s]  example until I beat this with a dead horse you eval the bread separately from the regiment of marmite
+[2117.04s -> 2121.12s]  you decide how to put these things together this inherently makes it more complex than just evelling one
+[2121.12s -> 2127.44s]  one model by itself for a i as in particular i think another thing you should eval is is it with
+[2127.44s -> 2132.08s]  different numbers of functions different complexity of functions just as a is an api use some
+[2132.64s -> 2137.36s]  libraries are really easy to use i'll pick pandas pandas plotting is like a really straightforward api to
+[2137.36s -> 2143.20s]  use and you can generate your plots and then a crazy hard api to use is a d3js api there's a lot going
+[2143.20s -> 2147.60s]  on you have to build a lot of components yourself these are like the extreme ends of visualization if you're
+[2147.60s -> 2152.08s]  trying to build a lib an agent that automatically lets a visualize spreadsheets which you totally can do
+[2152.08s -> 2158.24s]  you're gonna have to eval can use the pandas api effectively can it use the can it use the d3js
+[2158.24s -> 2164.16s]  AI effectively and make a decision between those two extremes it's another area of eval to think about
+[2164.16s -> 2169.68s]  with with agents and then if we move on to the most complex form of agents which is agents that are not
+[2169.68s -> 2174.56s]  just making function calls are making like multi-turn multi-help decisions let's say mariner it has
+[2174.56s -> 2180.72s]  where it takes in multiple screenshots of the are multiple web pages and i've used the browser
+[2180.72s -> 2187.44s]  and then makes actions you're then got to eval over multiple steps and over noisy images over
+[2187.44s -> 2193.20s]  things that happen on the open web that don't happen in a very clean sort of lm environments you really
+[2193.20s -> 2198.96s]  just have to understand your system well enough to know where the friction points or challenges could
+[2198.96s -> 2206.64s]  come in and really build out evals around the areas that are most likely to cause a bad user experience
+[2206.72s -> 2212.16s]  or derail your system and i know it's a very general answer but it's hard because there's so many
+[2212.16s -> 2216.16s]  different it's like how do you eval at any recipe that's ever been generated we're also different
+[2216.16s -> 2220.80s]  there's not just one single eval set for it every type of like dining experience even let's say and
+[2220.80s -> 2224.48s]  it's the same thing now with these agentic systems there's just so many different ways you can deploy
+[2224.48s -> 2229.60s]  them into so many different users the evals will be quite different absolutely and i love that you
+[2229.60s -> 2235.04s]  mentioned depending on what's happening in your system because the question arises there are so many
+[2235.12s -> 2240.00s]  tool calls which ones should i focus on writing evals for and all these types of things and the answer
+[2240.00s -> 2246.32s]  that of course is as a lot of people are saying now look at your data and the data scientist curiosity
+[2246.32s -> 2252.88s]  and mindset is essential here if you see that there's a particular tool call that doesn't work as
+[2252.88s -> 2258.00s]  often as you'd like that's something to write an eval for so making sure you're aware of what happens
+[2258.00s -> 2264.48s]  in your system and in fact we mentioned doing vibes first vibes can get you kind of far a link to this
+[2264.48s -> 2272.00s]  but in anthropics more recent blog posts on building their multi agent research system they actually
+[2272.56s -> 2280.56s]  when they looked at some initial traces they saw that the sub agents were often summarizing content
+[2280.56s -> 2289.68s]  from SEO like SEO game blog posts that had crappy content and they only saw that because humans looked
+[2290.00s -> 2294.96s]  at it and then recognized how to fix that so they could immediately solve that the other thing that
+[2294.96s -> 2300.80s]  I found really interesting is that it looks like LLMSA agents are getting better and I didn't think we'd
+[2300.80s -> 2306.56s]  get here this soon but getting better at healing their own prompts if they're given failure modes as well
+[2306.56s -> 2313.60s]  so we have some form of recursion happening here yes I would say on that point Gemini 3 I think
+[2313.60s -> 2318.80s]  is been really good about understanding where things are going wrong and then self-correcting
+[2318.88s -> 2323.60s]  you have to remember sometimes it's not the agents it's not the LM's fault that things fail because
+[2323.60s -> 2328.88s]  sometimes your environment fails the API responses and have the right token you hit a rate limit the API
+[2328.88s -> 2335.28s]  fails entirely and the model needs to the model can correct for these now when previously we just
+[2335.28s -> 2340.96s]  fail out to that point you should eval not only things the successful golden path but also the path
+[2340.96s -> 2345.76s]  where things tend to go wrong but luckily as the earlier question alluded to now these days the
+[2345.84s -> 2349.68s]  LM can handle these things on its own you don't need to retry from the programmatic side which is
+[2349.68s -> 2354.64s]  something I had to do much more often just a year ago I'd have to detect it in Python whether there
+[2354.64s -> 2359.52s]  was an API failure and then reprop the LM in a different way these days I'm finding myself just
+[2359.52s -> 2364.40s]  throwing the response to the LM and just letting it figure it out and stripping out all of my logic for
+[2364.40s -> 2372.00s]  failure detection so you also mentioned that with the complexity we have now in multi-hop agentic
+[2372.00s -> 2376.88s]  systems that type of stuff that perhaps just writing a Python file isn't all you want so maybe
+[2376.88s -> 2381.12s]  you can tell us a bit more about how you think about how to build these systems in infrastructure as
+[2381.12s -> 2386.56s]  well so I the dumbest way I can put it is that there's so many there's so many nuances that a single
+[2386.56s -> 2391.12s]  Python file won't capture it as much anymore so usually I'll have a Python file that's just test
+[2391.12s -> 2394.96s]  the function calling ability then maybe I'll have another Python file that checks whether the natural
+[2394.96s -> 2400.80s]  language response is good and then another one for checking failure cases in the simplest type of thing
+[2400.88s -> 2407.36s]  but if you get to super complex scenarios then sometimes there's things like dynamic evals where
+[2407.36s -> 2412.96s]  the eval can adapt as the LM is moving on like a system that the LM makes a call and you have another
+[2412.96s -> 2418.00s]  LM potentially mock a response or things like that there's so much room now not to just I have a
+[2418.00s -> 2422.96s]  static set of prompts and responses that you grade against but much more nuanced dynamical systems
+[2422.96s -> 2428.48s]  especially to test ed cases and things like that that I would encourage you to try these to try these
+[2428.48s -> 2433.12s]  out like really think about your evals as an edge I think hummel says a lot or a couple people say
+[2433.12s -> 2438.08s]  this is quite often they're evals themselves could be a competitive advantage or something that
+[2438.08s -> 2443.92s]  increases your velocity and you can come up with with deeper eval systems and single p i files these six
+[2443.92s -> 2447.84s]  totally agree with that the last one real quick one on that one the last one on aging system is that
+[2447.84s -> 2451.12s]  I've noticed more and more people doing this is just docker like they spit up docker containers
+[2451.12s -> 2455.28s]  to just do a bunch of evals that it's more than a dot p i flower there's a whole environment for an
+[2455.28s -> 2459.12s]  agent to go try bunch stuff out in the whole docker container becomes the environment they turn on
+[2459.12s -> 2463.12s]  the doc container at the end after it's been a bunch of file systems changes or whatnot but that's
+[2463.12s -> 2469.28s]  like a deeper eval than just a python file yeah and I do totally I think evals will be a huge part of
+[2469.28s -> 2474.32s]  products modes particularly in how they allow you to do really rapid product iteration and spin
+[2474.32s -> 2479.36s]  things up and spin things down as they work and don't work of course data is a huge mode as well and
+[2479.36s -> 2486.40s]  will continue to be I I'm just interested as we've entered that systems like Gemini and Mariner
+[2486.40s -> 2492.48s]  support just more integrated tools tool use at larger scale and I'm wondering what developers should
+[2492.48s -> 2497.76s]  learn from these kinds of systems when designing their own evals one is I think this looks to what
+[2497.76s -> 2502.64s]  other folks are doing is good inspiration or as a as what's possible because you can take you could
+[2502.64s -> 2505.92s]  see something like Mariner where you're getting a bunch of UI understanding and multi hop and you could
+[2505.92s -> 2510.64s]  think about what is it that I'm seeing with my users that could use this kind of behavior Google's
+[2510.64s -> 2515.04s]  on our own way we're like proving to you that Gemini is super capable by putting it on all these
+[2515.04s -> 2520.00s]  products that you're able to use for yourself but you also can take the power Gemini or Gemma and
+[2520.00s -> 2525.12s]  put it into your own things that that Google doesn't know about so that's one the second is then
+[2525.12s -> 2529.52s]  you can play a game where you like try and think about how would you have a eval this system and you
+[2529.52s -> 2534.80s]  can use like a Mariner or anti gravity or whatever and think about just like what is it that I would have
+[2534.80s -> 2540.56s]  evaled if I was to make the system myself and then build that evil for yourself as well so with Mariner
+[2540.56s -> 2545.92s]  for instance since I worked with that more you can see that it takes multiple turns and it can do
+[2545.92s -> 2551.04s]  multiple actions before it comes back to the user and asks potentially for for guidance or approval
+[2551.04s -> 2555.76s]  or help or things like that and so you can build that into your test harness for the product you're
+[2555.76s -> 2561.68s]  building is like a multi hop evil or a test to see the limits of multi hop in your your particular
+[2561.68s -> 2565.52s]  system and then of course the rest of the discussion just goes to what Hugo and I have already said is
+[2565.52s -> 2570.40s]  then you're going to want to that evil then becomes your like secret secret tool something you don't
+[2570.40s -> 2574.72s]  necessarily publish to users but something you can use to iterate quickly on whatever it is that you're
+[2574.72s -> 2580.40s]  trying to build with these L on systems so I'm wondering if you can just speak to collab agents are
+[2580.40s -> 2584.00s]  really interesting now and then there's a product called stitch that I don't think a lot of people
+[2584.00s -> 2589.12s]  know about so maybe you can just tell us about about what's happening in this space yeah so I'll see
+[2589.12s -> 2592.24s]  these are products that I haven't worked on directly at Google so I'm going to give you my second hand
+[2592.24s -> 2597.52s]  experience from my my colleagues but these are some of Google's coding coding platforms and coding tools
+[2597.52s -> 2602.88s]  collab agent is integrated directly into collab you can use it you can use it now and it essentially
+[2602.88s -> 2609.52s]  is like your pair programmer or software engineering data science or programming buddy that will help
+[2609.52s -> 2614.16s]  create plots and pandas code or whatever you need to do in a collab so a good example now is I used
+[2614.16s -> 2618.00s]  to have to write the pandas code by hand for plotting these days I just click generate and I say any
+[2618.00s -> 2623.20s]  in a bar plot with these colors and I just let collab do that stitches I'm more involved at the
+[2623.20s -> 2629.52s]  80 goes and codes for you I believe and these are LMS that are being used in collab is a little more
+[2629.52s -> 2634.48s]  synchronous stitches more I believe async where it's going to go out and do things for you while you're
+[2634.48s -> 2639.36s]  not at your your computer like it's totally different user experience and sitting down and watching
+[2639.36s -> 2646.48s]  and an LLM run run on your own so something we've talked about in passing but haven't index on
+[2646.48s -> 2652.64s]  explicitly more and more agents are working with images and files and speech and other multimodal
+[2652.64s -> 2658.56s]  inputs so how should we think about designing agentic systems and evaluating them when we're
+[2658.56s -> 2664.16s]  entering a multimodal space yeah so I suggested that earlier point it's you stick the text complexity
+[2664.16s -> 2668.80s]  and you just increase it a bit more as you talk about stitches like a UI design agent for instance
+[2668.80s -> 2674.00s]  for web applications and things like that and so to mix up providing code outputs and image outputs
+[2674.56s -> 2680.00s]  in one sense everything stays the same you now just input instead of inputting maybe instructions and
+[2680.00s -> 2688.16s]  text look at this file and edit the Python code you say look at this image and I guess with nano banana
+[2688.16s -> 2691.76s]  you can actually do is you say look at this image and remove all the ducks right this is it we can build an
+[2691.76s -> 2696.56s]  AI agent that removes all like the ducks from an image your inputs now would just be text it'd be the
+[2696.56s -> 2702.72s]  an email set of images as well and so same as text though you would have an email set of images you
+[2702.72s -> 2708.88s]  would run them through the API you would get back a set of edited images and and you would evil whether
+[2709.60s -> 2715.12s]  you were happy with the quality what was output it or not now there's a couple of additional pieces
+[2715.12s -> 2720.24s]  of complexity in that like working with audio and text takes more sorry audio and images takes more time
+[2720.24s -> 2726.24s]  it's not as easy just to grab through it but the fundamentals stay about the same but as we talk
+[2726.24s -> 2730.48s]  about before and now having an evil harness is a really good idea because you're not just dealing with
+[2730.48s -> 2735.20s]  text in text out you're dealing with many more moving pieces and it becomes much more easier to handle
+[2735.20s -> 2741.44s]  this when you have computer assistance through through through an evil harness super cool something we
+[2741.44s -> 2745.76s]  we hinted at earlier particularly when talking about anthropics research agent what Manus does
+[2746.40s -> 2752.56s]  there are a whole bunch of modern agent architectures that use orchestrators to spin up sub agents
+[2752.56s -> 2758.08s]  and move context between them so I'm wondering how you think about these systems and I think
+[2758.08s -> 2763.04s]  the jury's out on whether that will be the future but what challenges arise both in design and
+[2763.04s -> 2767.68s]  evaluation for these types of systems yeah and so admittedly and to be a friend as well I have not
+[2767.68s -> 2773.36s]  worked on one of these systems myself yet which compresses context or orchestrates with multiple sub agents
+[2773.36s -> 2777.52s]  just in this way I'm going to hear I'm going to speculate though with you how some of these systems
+[2777.52s -> 2783.04s]  may be designed one is when I think about e-values it's just I think at two levels is like what is
+[2783.04s -> 2788.08s]  the end-to-end product experience was to look at and in this case we could surmise one big model
+[2788.08s -> 2793.04s]  passes out tasks with a much smaller models and then you eventually get a thing done so on level the
+[2793.04s -> 2798.00s]  product and like does it just get the thing done better than a single model does it do it and does
+[2798.00s -> 2802.48s]  it do it better than an alternative architecture but on a detail level I think about all the different
+[2802.48s -> 2807.60s]  pieces that need to happen for this to occur so I can think about maybe one sub agent needs to take it
+[2807.60s -> 2811.76s]  maybe one of the things is it needs to compress the context does it do that that's just the one piece of
+[2811.76s -> 2816.88s]  this like orchestrator system so I would break that down into and a sub e-value and so I'd have
+[2816.88s -> 2822.48s]  this mix of e-values that are like end-to-end product e-values but also a lot of smaller e-values it
+[2822.48s -> 2828.48s]  tests like individual parts of the the system out now the conceptually they should connect and roll
+[2828.48s -> 2833.60s]  up but that's part of the e-value design mentality thinking at the different levels of which this
+[2833.60s -> 2838.16s]  system works and then ensuring I have e-values that check out every particular level
+[2838.24s -> 2844.64s]  makes a lot of sense and yeah I do think the context issue is so interesting now because of course
+[2844.64s -> 2849.20s]  we have really large context windows but we see there's context rot as well right so if you
+[2849.20s -> 2859.28s]  utilize even sub amounts of the available context we see degradation in retrieval among other things
+[2859.28s -> 2864.96s]  so something that people have been doing with these systems these architectures that use orchestrators
+[2864.96s -> 2871.20s]  to spin up sub agents is having an orchestrator agent essentially offload the context to a sub agent
+[2871.20s -> 2876.40s]  that works with it compresses it isolates things summarizes it and passes back up the relevant stuff
+[2876.40s -> 2882.72s]  there and I am interested also of course don't want to know any secret source about the things you
+[2882.72s -> 2889.60s]  work on but just how you think about context engineering in your work and managing context for
+[2889.68s -> 2894.48s]  agent systems so to this point you're like earlier LLM's would have these contexts well the first
+[2894.48s -> 2899.04s]  of early albums would just have context limits that were my stuff going back again like the first
+[2899.04s -> 2903.84s]  model I released I think I had a context window of 4k which is barely which is laughable these days
+[2903.84s -> 2909.12s]  right so you'd have to do a lot of this context management manually yourself outside filtering all the
+[2909.12s -> 2913.84s]  sort of stuff there are first gemma models how to context window I think of 8k yeah so again you'd
+[2913.84s -> 2918.80s]  have to do all these context management things in Python but as the ecosystem move forward now we have
+[2918.80s -> 2926.00s]  context windows under like 32k 128k million or more and so all this code we had that would manage
+[2926.00s -> 2931.04s]  context we could just we could just start ripping out now to your point you could self context
+[2931.04s -> 2936.00s]  segregation in that context itself and so I would say earlier versus Gemini weren't good as good at
+[2936.00s -> 2943.04s]  keeping context over the million tokens as Gemini 3 so one way on the with going back to the original
+[2943.04s -> 2947.84s]  part of this podcast is like with the with Gemini 3 coming out since we have you all harnesses
+[2947.84s -> 2952.72s]  a Google for internal stuff we just run those evil harnesses again and see whether if you just
+[2952.72s -> 2957.84s]  took out all this stuff for certain systems does it just work and you can with any evil harnesses
+[2957.84s -> 2963.28s]  a user you could do the same thing these layers of context engineering in previous context issues just
+[2963.28s -> 2968.96s]  fall away with these newer newer and better models that's the hand wave answer of as models get
+[2968.96s -> 2974.56s]  better you need less and less stuff but it is very much very much true but to go back to your question
+[2975.28s -> 2979.44s]  when we were launching Gemini 1.5 for instance with the million context window at the time
+[2979.44s -> 2982.96s]  why would you run a lot of emails with this thing called needle and a haystack you would put it in
+[2982.96s -> 2987.60s]  random fact in the middle and you just see where the context does the model remember things and where
+[2987.60s -> 2992.16s]  does it seem to fail film are often and then you could use that to structure your prompts you'd maybe
+[2992.16s -> 2997.36s]  put the important details at the top or the bottom depending on how this particular model model is doing
+[2997.36s -> 3001.60s]  but this going back to my previous answer this was me understanding that hey we're going to do this
+[3001.60s -> 3005.92s]  really long context ritual task that users want we don't want users have to worry about where to put
+[3005.92s -> 3010.88s]  in the context so let me run a bunch of emails at the contact just on the context window to understand
+[3010.88s -> 3015.44s]  how it works really well with this model and then I will structure the system so it puts the important
+[3015.44s -> 3019.68s]  details in the right place in the context the user doesn't have to worry about it this is the end-to-end
+[3019.68s -> 3025.68s]  level of thinking that helps with these really complex agentic AI systems for you to really hone in
+[3025.68s -> 3031.44s]  on what is holding back your product and fix that area and then also repeatedly do that so
+[3031.44s -> 3036.48s]  as new models come back you can build in that new model reduce the complexity of your product which
+[3036.48s -> 3041.12s]  helps you ship faster and keep up with all the amazing advancements that are going on it's really just
+[3041.12s -> 3046.40s]  like the symphony of things that are happening all at once and all together yeah and I do the points
+[3046.40s -> 3052.16s]  we're taking that evaluation is just incredibly important here to guide what you do and what you're
+[3052.16s -> 3057.04s]  working on I do think context rock does continue to like needle in a haystack does seem like a vanity
+[3057.04s -> 3061.84s]  metric in so many ways because a lot of the time the benchmarks and I can't I haven't look at the
+[3061.84s -> 3068.08s]  Gemini 1.5 paper in a while once again chrome the Chroma teams report on context rock shows that if
+[3068.08s -> 3073.84s]  you just put a couple of distractors close to it like needle in haystack performance degrades
+[3073.84s -> 3078.96s]  completely with higher context so this is you have to build the error and this is where I really
+[3078.96s -> 3082.96s]  think folks should build around and this is another pitch to build your own own emails right like nobody
+[3083.04s -> 3087.68s]  not even Google knows what you're going to do with our models and in our case for instance we could
+[3087.68s -> 3091.52s]  tightly control the context and so we didn't have to worry about context aggregation but you could end
+[3091.52s -> 3095.52s]  up with a different application where this is an issue like you'd have multiple users putting in
+[3095.52s -> 3099.44s]  multiple things like a meeting summarizer or something and you're having all this distracting
+[3099.44s -> 3103.84s]  stuff and the model performs much more poorly than let's say the notebook LM case which is you're
+[3103.84s -> 3109.84s]  highly curating super high single sources that are then getting put into a Gemini's context so
+[3110.48s -> 3119.44s]  I am interested in from an external take it seems as though frontier close models from the labs
+[3120.16s -> 3126.64s]  just far better at tool calling and function calling and building agentic systems than open-weight
+[3126.64s -> 3134.40s]  models now so I'm wondering firstly if that is a characterization you would agree with
+[3135.20s -> 3140.72s]  and if so when building agents on top of local or open-weight models like Gemma what changes?
+[3141.68s -> 3148.16s]  I would say it's maybe this isn't too controversial it's a wastey of a take but models that are hosted
+[3148.16s -> 3152.40s]  models that they're hosted on production grade infrastructure tend to be the smoothest
+[3152.40s -> 3157.44s]  easiest user experience remember when you're using models there's two things that are happening you
+[3157.44s -> 3162.08s]  have a set of weights that have been trained but you also have them deployed on top of us a system
+[3162.08s -> 3166.00s]  that is serving that model to you now that system could either be something like Google is providing
+[3166.00s -> 3172.56s]  to you in terms of Gemini and our API or could be your own MacBook that's running it and so an
+[3172.56s -> 3176.72s]  example that you you go should earlier is that with like tool calling we built a lot of things in the
+[3176.72s -> 3181.92s]  API to make it a much smoother experience for you both on the model side and the API API side and
+[3181.92s -> 3186.32s]  on the open-weight side you need to go do some of these things yourself so generally yes building agents
+[3186.32s -> 3191.84s]  on top of these APIs will tend to give you very high performing models on very high performing
+[3191.84s -> 3197.12s]  infrastructure and your life is a lot better if you're going to implement them yourself especially
+[3197.12s -> 3201.84s]  open-weight side you will need to get down like a chain or an Olamma and you'll work through
+[3202.56s -> 3208.32s]  the models capabilities and the inference frameworks capabilities yourself or if you're really in the
+[3208.32s -> 3213.68s]  weeds you'll develop your own inference framework with its own agentic inference layer I see very
+[3213.68s -> 3218.16s]  few people do this but it's like something that the most hardcore people can do you sometimes see
+[3218.24s -> 3222.96s]  this with some of the coding companies I think I'm forgetting which one off the top of my head but some
+[3222.96s -> 3228.08s]  of these e-editors or cursor for instance there's a really good example this cursor is building a very
+[3228.08s -> 3234.72s]  deeply integrated inference stock with their with some of their VS code type of stuff yeah this the
+[3234.72s -> 3239.60s]  but on the part one catch on gifty the open models as you can fine-tune them and so it's very well
+[3239.60s -> 3245.12s]  understood that Gemini for instance is a very general model it does a lot of things quite well but it
+[3245.12s -> 3251.60s]  is a general model even within the Gemini or the Google ecosystem there was a Gemma variant called
+[3251.60s -> 3256.80s]  C2S for instance which could predict cancer and it was I hesitate to call it an agent since the word
+[3256.80s -> 3261.20s]  is overloaded but it could do this thing where it understood and could understood like cancer markers
+[3261.20s -> 3265.60s]  quite well and it was able now to then predict cancer markers better than Gemini could but it was
+[3265.60s -> 3269.60s]  more specifically fine-tuned to do cancer markers and I wouldn't be able to do any literally anything
+[3269.60s -> 3273.60s]  else you couldn't answer questions about Australia you probably can't answer questions about what to
+[3273.60s -> 3278.64s]  cook for eggs or anything about your dog but it is very good at this one specialized task if you're
+[3278.64s -> 3284.96s]  growing to build something that is hyper specialized fine-tuning for that case can yield you great
+[3284.96s -> 3290.32s]  improvements which is really only something you can do with an open model totally and all linked to
+[3290.32s -> 3296.64s]  a wonderful podcast that we did and a workshop we ran on tiny Gemma when when you released it 270
+[3296.64s -> 3303.28s]  million people not 270 billion I hadn't planned we hadn't I didn't plan to asking this but could
+[3303.28s -> 3308.88s]  you just give us a quick rundown I just love it so much of the Gemma the Gemma family from 270 million
+[3308.88s -> 3317.28s]  and up yeah so at Google we recognize that there's like a huge need and capabilities the capabilities and
+[3317.28s -> 3322.56s]  usefulness of very large models like Gemini that are just generally great and a lot of things and
+[3322.56s -> 3328.08s]  really large really good at pushing the frontier of what AI can do but equally there is folks that
+[3328.08s -> 3334.48s]  need models that run on device on what we say a single node like an h100 or below that's really
+[3334.48s -> 3339.20s]  something you can take put it on your system fine-tuned and make it your own to serve all the other
+[3339.20s -> 3346.24s]  all the other things and so in the Gemma family we have a 27b model is our largest our largest model
+[3346.24s -> 3355.28s]  but it sits it fits on a single h100 or 800 but we go down to 12b 4b 1b and the smallest now is 270
+[3355.28s -> 3360.96s]  m so this is something that runs on you could run on your phone quite reliably and quite easily so to
+[3360.96s -> 3365.28s]  answer this like agents question again if you need your agent to work somewhere without internet or
+[3365.28s -> 3370.32s]  like you're off the grid then you're gonna have to use a Gemma model like you can't use Gemini and
+[3370.32s -> 3374.64s]  that's the easiest evil is it literally just will not run this isn't an agent but it's a fun example
+[3374.64s -> 3379.68s]  is we have dolphin Gemma it's a fine-tuned version of Gemma that runs literally underwater with
+[3379.68s -> 3384.96s]  scuba divers researchers who are like next to dolphins so you're in a notion and even if you had
+[3384.96s -> 3389.36s]  started like I presume it wouldn't even go into the water so you have to use a local model to talk to
+[3389.36s -> 3395.04s]  these dolphins in the ocean we have a Gemma model that specialized for that and so similarly with 270
+[3395.04s -> 3399.68s]  m we made this small model that's super easily fine-tunable what you could take and train on your
+[3399.68s -> 3403.92s]  own functions and make it a really great like small function calling model now admittedly if you
+[3403.92s -> 3407.44s]  ran an e-mail could this thing code an entire Python code base they would miserably fail just
+[3407.44s -> 3411.92s]  bring very blunt I don't even have to run the e-mail it's not going to replace your coding agent or a
+[3411.92s -> 3417.44s]  Gemini CLI but if you need really great one-to-five function calls for example you can easily train a
+[3417.44s -> 3423.04s]  Gemma 270 m to be really good at that one task and it'll just be great at that one task super cool
+[3423.04s -> 3428.88s]  and actually one example we went through in the workshop this is a huge use case and not
+[3428.88s -> 3435.44s]  insignificant part of the economy is on device gaming worlds and having NPCs NPCs able to generate
+[3435.44s -> 3442.72s]  language and of course fine-tuning language models around what you want NPCs in gaming worlds to talk
+[3442.72s -> 3450.64s]  like is incredibly useful I am interested in just hearing your thoughts we're going to have to wrap
+[3450.64s -> 3455.36s]  up in a minute but I'm on your thoughts about what you're excited about in the agentic and
+[3455.36s -> 3461.84s]  evaluation space more generally in the coming months and maybe even year so there's two two aspects
+[3461.84s -> 3467.04s]  in which we talked about and I'm excited about both one is as the top my models just get better and
+[3467.04s -> 3471.68s]  better Gemini 3 thankfully really today just for this podcast and I'll leave it up to you folks to
+[3471.68s -> 3477.12s]  take it and see how much better it is than Gemini 2.5 I believe you will be pleasantly surprised
+[3477.12s -> 3483.28s]  but this is literally the best an AI model has ever been able to do in history ever like it's really
+[3483.28s -> 3489.44s]  cool to see the frontier move forward and especially so much such regular pieces so the frontier side
+[3489.44s -> 3495.12s]  is very interesting to me but there's also this idea which is called like the Pareto frontier that
+[3495.12s -> 3500.40s]  the small models are also getting better now they're not becoming better than the maximum limit
+[3500.40s -> 3506.00s]  but for their size they're getting much much better as well and so Gemini 2.7 m and Gemini 4B are
+[3506.00s -> 3509.92s]  really good examples for that are they the best models that have ever been created at this point now
+[3509.92s -> 3514.00s]  Gemini 2.7 even is not the best model that's ever been created but is it the best model for its
+[3514.00s -> 3519.68s]  size and its efficiency and its usability for frontearning yes I think so and it is something now that
+[3520.24s -> 3526.16s]  opens up use cases so many use cases for folks that had like on device or low inference cost or
+[3526.72s -> 3532.32s]  very specific needs to push the frontier in those specific areas and actually I'm very excited to
+[3532.32s -> 3537.84s]  see all of that which is how people take take models of their own and push the sub front not sub
+[3538.00s -> 3543.20s]  frontiers and that they're smaller but different frontiers then where the large models are going
+[3543.20s -> 3548.72s]  and that is quite exciting to me so I'm also excited to see users take the Gemini models and
+[3548.72s -> 3553.44s]  build their own evals see that there's areas that they could improve their performance on and then
+[3553.44s -> 3559.76s]  fine tune these models to really excel for their particular use cases incredibly cool and I'm
+[3559.76s -> 3566.56s]  actually excited to jump in and use Gemini 3 ASAP for many reasons but the next week of our course
+[3566.56s -> 3572.16s]  is actually on function calling and building agents and I've been using Gemini 2.5 in
+[3572.16s -> 3576.72s]  a lot of it so after this live stream I'm actually going to go and see how much I can change to
+[3576.72s -> 3582.80s]  Gemini 3 and see what the results are so I'll report back next awesome thanks everyone for watching
+[3582.80s -> 3588.16s]  and thank you Ravant for your time and wisdom and just all the great chats we have so really appreciate
+[3588.16s -> 3594.08s]  it man of course all right thank you folks yeah see you all soon thanks for tuning in everybody
+[3594.08s -> 3598.88s]  and thanks for sticking around until the end of the episode I would honestly love to hear from
+[3598.88s -> 3603.84s]  about what resonates with you in the show what doesn't and anybody you'd like to hear me speak with
+[3603.84s -> 3608.48s]  along with topics you'd like to hear more about the best way to let me know is currently on LinkedIn
+[3608.48s -> 3612.88s]  and I'll put my profile in the show notes thanks once again and see you in the next episode

@@ -263,6 +263,105 @@ async def get_transcript(request: TranscriptRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/process")
+async def process_next_item(background_tasks: BackgroundTasks):
+    """
+    Process the next pending item from Notion database.
+
+    Queries the database for items with Status = "Pending" or empty,
+    picks the oldest one, and processes it.
+
+    Requires NOTION_DATABASE_ID environment variable to be set.
+    """
+    settings = get_settings()
+
+    if not settings.notion_database_id:
+        raise HTTPException(
+            status_code=400,
+            detail="NOTION_DATABASE_ID environment variable not set"
+        )
+
+    try:
+        # Get pending items from Notion
+        pending = await notion_client.get_pending_items(settings.notion_database_id, limit=1)
+
+        if not pending:
+            return {
+                "status": "no_pending",
+                "message": "No pending items found in database",
+            }
+
+        item = pending[0]
+        page_id = item["page_id"]
+        title_field = item["title"]
+        url_field = item["url"]
+
+        logger.info(f"Found pending item: {page_id}")
+        logger.info(f"Title: {title_field}")
+        logger.info(f"URL: {url_field}")
+
+        # Find URL from either field
+        content_url = find_content_url(url_field, title_field)
+
+        if not content_url:
+            error_msg = "No URL found in either URL field or Title field"
+            await notion_client.update_page_status(page_id, "Error", error_message=error_msg)
+            return {
+                "status": "error",
+                "page_id": page_id,
+                "message": error_msg,
+            }
+
+        # Check if URL was in title
+        url_was_in_title = not url_field.startswith("http") and title_field.startswith("http")
+
+        # Queue background task
+        background_tasks.add_task(
+            process_transcript_task,
+            page_id,
+            content_url,
+            None,  # auto-detect content type
+            url_was_in_title,
+        )
+
+        return {
+            "status": "processing",
+            "page_id": page_id,
+            "content_url": content_url,
+            "detected_type": detect_content_type(content_url),
+        }
+
+    except Exception as e:
+        logger.error(f"Error processing next item: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/pending")
+async def get_pending_count():
+    """
+    Get count of pending items in the Notion database.
+
+    Useful for monitoring how many items are waiting to be processed.
+    """
+    settings = get_settings()
+
+    if not settings.notion_database_id:
+        raise HTTPException(
+            status_code=400,
+            detail="NOTION_DATABASE_ID environment variable not set"
+        )
+
+    try:
+        pending = await notion_client.get_pending_items(settings.notion_database_id, limit=100)
+        return {
+            "pending_count": len(pending),
+            "items": pending[:10],  # Return first 10 for preview
+        }
+    except Exception as e:
+        logger.error(f"Error getting pending items: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/webhook/raw")
 async def raw_webhook(request: Request, background_tasks: BackgroundTasks):
     """

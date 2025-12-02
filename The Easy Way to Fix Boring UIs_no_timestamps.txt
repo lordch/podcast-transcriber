@@ -1,0 +1,125 @@
+So, this is a pretty average nav design that we see everywhere, but some users may find it boring or too basic.
+To fix this, all we need is a few shades of the same color and then layer them like this.
+The idea is pretty simple.
+We are increasing the lightness value by 0.1 and then add the lighter color on top to create a sense of depth.
+I have covered these concepts in the colors video, so feel free to watch it before or after watching this video.
+But for now, let's take things to the next level.
+Level one would be a small shadow that is created by adding a light border or glow on top and then some dark shadow at the bottom.
+Combining soft and dark shadows gives a much more realistic feel than one basic shadow.
+Then we can just bump these values by a few pixels to add more depth.
+These two shadows are enough for most use cases, but you can always go one level higher by pushing these values by a few more pixels.
+Then it's up to you to decide which shadow works best for which element.
+For example, out of these three shadows, the small one feels much more natural than the other.
+So, to recap, it's a very simple two-step process.
+First, create three to four shades of the same color and then create some shadows.
+Now, start playing with depth.
+We have a pretty standard profile card here.
+Nothing wrong with it, but some may find it a little boring.
+So, let's follow our two steps.
+First, create layers by adding a lighter color on important elements.
+Then add the small shadow to add more depth.
+We can make it a bit more interesting by adding a bigger shadow on hover.
+Works best on light mode.
+The default theme for most people.
+So never ignore light mode just because you never use it.
+Now that we have the basics down, let's fix some boring UIs.
+We are going to start with this clean and simple design and increase the complexity as we move forward.
+As always, we start by adding a background color that's a bit lighter than the page itself.
+Then let's highlight the selected tab by adding a lighter shade, but that's made the text and icon color a bit muted.
+So, we got to increase the lightness on those two as well.
+Again, if this seems a bit confusing, I highly recommend watching the colors video.
+Now, let's highlight these drop downs as well as they are the main elements of this UI.
+This is already working, but we can add more depth by combining a gradient with a lighter inner shadow on top.
+The shiny highlight up top complements these kinds of linear gradients really well. like as if the light coming from the top and that's why the top part is lighter than the bottom.
+But this was too easy to fix.
+Let's try a very common and boring UI element radio buttons.
+First of all, we are going to wrap everything inside a lighter card.
+Then highlight the options and add a bit of spacing.
+Also, we need to emphasize the selected option as well.
+Now, let's improve the typography and rearrange things to create hierarchy.
+The design can be further improved by adding a bit more depth to the selected card.
+This is the same small shadow we used in the beginning where we used a light inset shadow up top and a dark shadow at the bottom.
+Again, we are trying to sell the effect of light hitting this card because it's elevated and closer to the user making it more important.
+This is a pretty brilliant technique in UI design.
+You know who else is Brilliant?
+The sponsor of this video.
+Brilliant is a learning app designed to be uniquely effective.
+Each lesson is filled with hands-on problem solving that lets you play with concepts, a method proven to be six times more effective than watching lecture videos.
+Brilliant starts you with mastering the foundations, then helps you level up to increasingly challenging problems.
+It has a perfect mix of engaging problems, competitive features, and daily encouragement that keeps you motivated and on track.
+Plus, all content on Brilliant is crafted by an award-winning team of teachers and professionals from top tier institutions.
+Whether you're learning to code, build formulas, design electrical circuits, run simulations, or explore cuttingedge topics like AI, you can try it all for free.
+Just visit brilliant.org/sided or scan the QR code on screen or click on the link in the description.
+Brilliant's also given our viewers 20% off an annual premium subscription, which gives you unlimited daily access to everything on Brilliant.
+So, here is the before and after of last UI we did.
+Now let's do some in light theme as well.
+This is kind of overall big picture UI.
+Again, pretty familiar and basic style.
+A sidebar, two cards on top that contains big and bold text.
+Then some kind of graph and finally a table.
+Right now everything is kind of blending in together.
+There is no hierarchy.
+Let's choose a darker shade for the background and leave these four main elements as it is.
+And immediately these four elements start popping off the page like they want your attention.
+But that's also the problem.
+So the next step is to deemphasize few of them.
+Let's start with this table at the bottom.
+Then a bit darker shade for the graph as well.
+But notice it's lighter than the table.
+And because we are using color to create different layers, we can remove borders on the lighter elements.
+We can create even more depth by adding a small shadow on the smaller card and a big shadow on the bigger one.
+Of course, they could use the same shadow or the smaller one have the big shadow depending on the context.
+The main idea is to raise or lower certain elements.
+On that note, we can add a dark inset shadow on top and a light inset shadow at the bottom of the table, like if it's deeper than everything else.
+We can also add a slightly darker background color to really sell this effect.
+And the design is changed so much by just using four shades of gray and some shadow.
+To take it to the next level, try adding some color.
+Of course, the color will depend on the context, but most colors will work if done correctly.
+Now let's use whatever we have done so far and try to fix this UI.
+Again, nothing wrong with it.
+It's clean and simple, but just too basic and maybe boring for some users.
+We have a light background color.
+Let's use it to create a darker and lighter shade to create three shades in total.
+As we have seen so far, we do this to create layering of top, middle, and bottom elements.
+Step one would be to change the page color to bg dark as it's the base for everything that comes on top of it.
+Then we can separate these three sections by applying the BG color.
+Let's start with section one.
+Nice round curves can make anything beautiful and using BG light for the interactive elements makes sense as they are the elements that actually make this interface.
+Finally, some shadow and we can move on to section two.
+Round corners, padding, and a shadow to start things off.
+Now that we have a card, we can rearrange some stuff to improve the design.
+And if you notice, we have also removed the border from the pro tag as we can just use a lighter shade to highlight it.
+So let's do the similar thing with this progress bar to match our overall design.
+If you notice, we are using dark and light inset shadow to push it into the card.
+So the actual progress bar appears slightly elevated.
+And while we are here, this text seems important, but the typography is lacking.
+So let's fix that as well.
+Perfect.
+Let's move to the final section.
+You might think there is little to no room for improvement as they are just two radio buttons.
+And why even bother wasting time on this when you can be designing or building much important things.
+And I agree.
+Don't waste time perfecting every little detail when the outcome doesn't worth the effort.
+But adding depth is so satisfying and literally takes a few lines of code that makes it worth it.
+Let's start by highlighting both options.
+And as we did earlier, we can do better than this basic version.
+Why not add some icon to complement the option?
+You can find these anywhere online.
+All it takes is one click to copy the SVG.
+Now, this button feels out of place, so let's send it to the right and use the same lighter background to make it part of the section.
+Also, this heading is not necessary as this section is self-explanatory.
+Now, let's bring everything together to see how they look as a whole UI.
+This is nice, but let's expand the billing section to match the model section.
+I hope you can see the night and day difference between before and after.
+Speaking of night and day, this works on dark theme as well.
+And all the dark theme examples we've seen earlier will work on light theme as well.
+You just need to use color and shadow variables to assign background and box shadows.
+Again, watch the colors video if you haven't already.
+The idea is very simple.
+You can turn an average design to good design just by using depth.
+Of course, we could have done tons of other things to further improve the design, but let me tell you a design secret.
+It takes a lot less effort to take an average design to good tier than it is to take a good design to S tier.
+It's kind of like how in video games there is big graphics change when you go from normal to high settings.
+But when you go from high to ultra, there is a huge loss in FPS, but you don't really see it in graphics quality.
+The high setting is the sweet spot for good graphics and playable FPS.
+And as I shown in this video, depth is that easy way to fix
